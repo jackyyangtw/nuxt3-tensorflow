@@ -6,6 +6,7 @@
 
 # tesnorflowjs coco-ssd (物件偵測)
 - https://github.com/tensorflow/tfjs-models/tree/master/coco-ssd
+- DEMO: https://tensorflow-js-object-detection.glitch.me/
 
 # 模型比較
 | 特徵/模型       | MobileNet      | ResNet   | Inception        |
