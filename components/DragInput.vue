@@ -29,7 +29,7 @@ import type { version } from 'vue';
 </template>
 
 <script setup>
-const {$model} = useNuxtApp()
+const {$MOBILENET, $COCOSSD} = useNuxtApp()
 
 const imgRef = ref(null)
 const emit = defineEmits(['getPrediction'])
@@ -39,7 +39,7 @@ const handleFileChange = async (e) => {
     reader.readAsDataURL(file)
     reader.onload = async () => {
         const img = reader.result;
-        if (!$model) {
+        if (!$MOBILENET || !$COCOSSD) {
             console.error('Model is not loaded yet');
             return;
         }
@@ -47,11 +47,18 @@ const handleFileChange = async (e) => {
             imgRef.value.src = img;
             // 等待圖片載入
             await imgRef.value.decode();
-            const predictions = await $model.classify(imgRef.value);
-            console.log(predictions)
+
+            // mobileNetV2
+            const MOBILENETPredictions = await $MOBILENET.classify(imgRef.value);
+            console.log(MOBILENETPredictions)
             // 比較 predictions 中每個物件的 probability，取出最大值
             // const { className: prediction } = predictions.reduce((a, b) => (a.probability > b.probability) ? a : b);
-            emit('getPrediction', predictions)
+            
+            // cocoSsd
+            const cocoSsdPredictions = await $COCOSSD.detect(imgRef.value);
+            console.log(cocoSsdPredictions)
+            
+            emit('getPrediction', MOBILENETPredictions)
         }
     }
 }
