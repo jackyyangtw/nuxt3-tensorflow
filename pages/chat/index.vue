@@ -1,5 +1,5 @@
 <template>
-    <form action="" @submit.prevent="handleQuestion">
+    <form v-if="!isLoading" action="" @submit.prevent="handleQuestion">
         <div class="space-y-8">
             <div class="space-y-2">
                 <h2 class="text-3xl font-bold"
@@ -21,6 +21,7 @@
                         placeholder="輸入需要提問的文章"
                     ></textarea>
                 </div>
+
                 <div class="space-y-2">
                     <label
                         class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
@@ -35,6 +36,23 @@
                         placeholder="輸入問題"
                     />
                 </div>
+                <div class="space-y-2">
+                    <label
+                        class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                        for="question"
+                    >
+                        回答的語言
+                    </label>
+                    <select name="" id="" v-model="selectedLang">
+                        <option
+                            :selected="selectedLang === supportLang.code"
+                            :value="supportLang.code"
+                            v-for="supportLang in supportLangs"
+                            :key="supportLang"
+                            >{{ supportLang.name }}</option
+                        >
+                    </select>
+                </div>
                 <button
                     class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
                 >
@@ -43,15 +61,19 @@
             </div>
         </div>
     </form>
+    <LoadingModel v-else />
     <div v-if="fetchedResults">{{ fetchedResults }}</div>
+
     <div v-if="answers">{{ answers }}</div>
 </template>
 
 <script setup>
-import * as tf from "@tensorflow/tfjs";
-import * as qna from "@tensorflow-models/qna";
+import { useModelsStore } from "@/stores/models";
+import { QNA } from "@/stores/models";
+const modelsStore = useModelsStore();
+const { loadQNA, setupTf } = modelsStore;
+// const { isQNALoaded } = storeToRefs(modelsStore);
 
-let QNA = null;
 const passage = ref(
     `US Senator Tom Cotton repeatedly asked Shou Zi Chew, the CEO of Chinese-owned social media app TikTok, about his links to the Chinese Communist Party, despite Mr Chew repeatedly asserting that he is Singaporean at a hearing in Washington DC on Wednesday.In this minute-long exchange, Mr Cotton asks Mr Chew about his citizenship, passport and whether he is a member of the CCP, to which he replies "Senator, I'm Singaporean. No."TikTok is owned by Chinese company ByteDance.Mr Chew denies his company has ever shared or received a request to share US users data with the Chinese government.`
 );
@@ -59,8 +81,6 @@ const question = ref("");
 const answers = ref(null);
 
 const fetchedResults = ref(null);
-
-const targetLanguage = computed(() => "zh-TW");
 
 const translateText = async (enteredText, targetLang = "en") => {
     const response = await $fetch("/api/translate", {
@@ -72,7 +92,7 @@ const translateText = async (enteredText, targetLang = "en") => {
 
 const handleQuestion = async () => {
     answers.value = null;
-    if (!QNA) return;
+    // if (!isQNALoaded.value) return;
     const translatedQuestion = await translateText(question.value);
     const result = await QNA.findAnswers(translatedQuestion, passage.value);
     if (result.length === 0) {
@@ -85,13 +105,25 @@ const handleQuestion = async () => {
     ).text;
     const translatedAnswer = await translateText(
         highScoreAnswer,
-        targetLanguage.value
+        selectedLang.value
     );
     answers.value = translatedAnswer;
 };
 
+const supportLangs = ref([]);
+const selectedLang = ref("");
+const isLoading = ref(true);
 onMounted(async () => {
-    await tf.ready();
-    QNA = await qna.load();
+    const langs = await $fetch("/api/translate-lang");
+
+    const defaultLang = langs.find((lang) => lang.code === navigator.language);
+    selectedLang.value = defaultLang.code;
+
+    supportLangs.value = langs;
+
+    await setupTf();
+    await loadQNA();
+    isLoading.value = false;
+    // {code: 'gd', name: 'Scots Gaelic'}
 });
 </script>

@@ -16,8 +16,6 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
-
 const text = ref("");
 const target = ref("zh-TW");
 const translation = ref("");
