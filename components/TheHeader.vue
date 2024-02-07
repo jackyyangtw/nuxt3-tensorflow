@@ -22,7 +22,7 @@
             </nuxt-link>
             <nav class="flex space-x-8">
                 <nuxt-link
-                    to="/image"
+                    to="/image-recognition"
                     class="text-gray-900 hover:underline dark:text-gray-100"
                 >
                     圖像識別

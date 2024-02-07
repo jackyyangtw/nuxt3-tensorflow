@@ -69,9 +69,10 @@
 
 <script setup>
 import { useModelsStore } from "@/stores/models";
-import { QNA } from "@/stores/models";
+// import { QNA } from "@/stores/models";
 const modelsStore = useModelsStore();
 const { loadQNA, setupTf } = modelsStore;
+const { QNA } = storeToRefs(modelsStore);
 // const { isQNALoaded } = storeToRefs(modelsStore);
 
 const passage = ref(
@@ -94,7 +95,10 @@ const handleQuestion = async () => {
     answers.value = null;
     // if (!isQNALoaded.value) return;
     const translatedQuestion = await translateText(question.value);
-    const result = await QNA.findAnswers(translatedQuestion, passage.value);
+    const result = await QNA.value.findAnswers(
+        translatedQuestion,
+        passage.value
+    );
     if (result.length === 0) {
         fetchedResults.value = "No answers found";
         return;

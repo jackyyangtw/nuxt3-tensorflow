@@ -5,11 +5,11 @@ import * as qna from "@tensorflow-models/qna";
 import * as deeplab from "@tensorflow-models/deeplab";
 
 // tsfjs models
-export let MOBILENET = null;
-export let COCOSSD = null;
-export let QNA = null;
-export let DEEPLAB = null;
-export let TF = tf;
+let MOBILENET = null;
+let COCOSSD = null;
+let QNA = null;
+let DEEPLAB = null;
+let TF = tf;
 
 export const useModelsStore = defineStore("models", {
     state: () => ({
@@ -19,9 +19,32 @@ export const useModelsStore = defineStore("models", {
         isTfReady: false,
         isDEEPLABLoaded: false,
     }),
+    getters: {
+        MOBILENET() {
+            if (!this.isMOBILENETLoaded) return null;
+            return MOBILENET;
+        },
+        COCOSSD() {
+            if (!this.isCOCOSSDLoaded) return null;
+            return COCOSSD;
+        },
+        QNA() {
+            if (!this.isQNALoaded) return null;
+            return QNA;
+        },
+        DEEPLAB() {
+            if (!this.isDEEPLABLoaded) return null;
+            return DEEPLAB;
+        },
+        TF() {
+            if (!this.isTfReady) return null;
+            return TF;
+        },
+    },
     actions: {
         async setupTf() {
             if (this.isTfReady) return;
+
             await tf.setBackend("webgl");
             await tf.ready();
             TF = tf;
