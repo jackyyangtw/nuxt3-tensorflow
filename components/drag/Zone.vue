@@ -1,130 +1,72 @@
 <template>
-    <LoadingModel v-if="loadingModel" />
-    <div class="flex pt-10" v-else>
+    <div
+        class="drag-zone grid w-full max-w-3xl items-center gap-1.5 mx-auto relative transition-all duration-300"
+    >
         <div
-            class="drag-zone grid w-full max-w-3xl items-center gap-1.5 mx-auto relative transition-all duration-300"
+            class="z-20 dragzone border-dashed border-4 rounded-lg p-10 flex flex-col justify-center items-center cursor-pointer hover:border-blue-500 transition-all duration-300"
+            :class="{
+                'border-blue-500': imgSrc,
+                'border-gray-200': !imgSrc,
+            }"
+            @dragover.prevent
+            @dragleave.prevent
+            @drop.prevent="handleFileDrop"
+            @click="fileInputClick"
         >
-            <div
-                class="z-20 dragzone border-dashed border-4 rounded-lg p-10 flex flex-col justify-center items-center cursor-pointer hover:border-blue-500 transition-all duration-300"
-                :class="{
-                    'border-blue-500': imageSrc,
-                    'border-gray-200': !imageSrc,
-                }"
-                @dragover.prevent
-                @dragleave.prevent
-                @drop.prevent="handleFileDrop"
-                @click="fileInputClick"
+            <input
+                type="file"
+                class="hidden"
+                @input="handleFiles"
+                accept="image/*"
+                ref="fileInput"
+            />
+            <p v-if="!imgSrc"
+                >拖拽圖片到這裡或者
+                <span class="text-blue-500 underline">點擊上傳</span></p
             >
-                <input
-                    type="file"
-                    class="hidden"
-                    @input="handleFiles"
-                    accept="image/*"
-                    ref="fileInput"
+
+            <figure class="relative">
+                <img
+                    v-if="imgSrc"
+                    ref="imgRef"
+                    :src="imgSrc || ''"
+                    class="max-w-full mt-4"
+                    alt="圖片預覽"
+                    @load="imgLoadedHandler"
                 />
-                <p v-if="!imageSrc"
-                    >拖拽圖片到這裡或者
-                    <span class="text-blue-500 underline">點擊上傳</span></p
-                >
-                <figure class="relative" v-if="imageSrc">
-                    <img
-                        ref="imgRef"
-                        :src="imageSrc || ''"
-                        class="max-w-full mt-4"
-                        alt="圖片預覽"
-                        @load="predictImage"
-                    />
-                    <div v-for="dimension in objectDimensions" :key="dimension">
-                        <div
-                            class="absolute bg-green-700/[0.5]"
-                            :style="{
-                                left: dimension.left + 'px',
-                                top: dimension.top - 50 + 'px',
-                                width: dimension.width + 'px',
-                                height: dimension.height + 'px',
-                            }"
-                        >
-                            <div
-                                class="absolute w-full bg-orange-400/[0.8] p-1 text-xs text-white"
-                            >
-                                {{ dimension.class }} - {{ dimension.score }}%
-                            </div>
-                        </div>
-                    </div>
-                </figure>
-            </div>
-            <div
-                class="glass-effect z-10 w-full h-full rounded-lg p-4 overflow-y-auto shadow-lg absolute top-0 left-0 backdrop-blur-2xl"
-            >
-            </div>
-            <div
-                class="dominant-Color w-full h-full rounded-lg p-4 overflow-y-auto absolute top-0 left-0"
-                :style="{
-                    background: imageSrc
-                        ? `center / cover no-repeat url(${imageSrc})`
-                        : 'none',
-                }"
-            >
-            </div>
+                <slot name="prediction"></slot>
+            </figure>
         </div>
-        <Transition name="fade">
-            <div
-                v-if="results"
-                class="precictions pl-10 w-1/2 mx-auto relative pt-5"
-            >
-                <h2 class="text-2xl font-bold pb-5 flex">
-                    <figure class="w-8 mr-3">
-                        <img src="/ai-icon.png" alt="" />
-                    </figure>
-                    <span>識別結果</span>
-                </h2>
-                <div v-if="objectNames.length > 0">
-                    這張圖片中有以下物體：
-                    <span v-for="(name, index) in objectNames" :key="name">
-                        {{ name }}
-                        <span v-if="index !== objectNames.length - 1">、</span>
-                    </span>
-                </div>
-                <p v-else>目前沒有識別到物體</p>
-            </div>
-        </Transition>
+        <div
+            class="glass-effect z-10 w-full h-full rounded-lg p-4 overflow-y-auto shadow-lg absolute top-0 left-0 backdrop-blur-2xl"
+        >
+        </div>
+        <div
+            class="dominant-Color w-full h-full rounded-lg p-4 overflow-y-auto absolute top-0 left-0"
+            :style="{
+                background: imgSrc
+                    ? `center / cover no-repeat url(${imgSrc})`
+                    : 'none',
+            }"
+        >
+        </div>
     </div>
 </template>
 
 <script setup>
-// import { COCOSSD } from "@/stores/models";
-import { useModelsStore } from "@/stores/models";
-// import ColorThief from "colorthief";
-
-const modelsStore = useModelsStore();
-const { loadCocoSsd, setupTf } = modelsStore;
-const { COCOSSD } = storeToRefs(modelsStore);
+const fileInput = ref(null);
 
 const imgRef = ref(null);
-const results = ref(null);
-const loadingModel = ref(true);
+const imgSrc = ref(null);
 
-onMounted(async () => {
-    await setupTf();
-    await loadCocoSsd();
-    loadingModel.value = false;
-});
-
-const fileInput = ref(null);
-const imageSrc = ref(null); // 新增一個 ref 來儲存圖片的 URL
+const emit = defineEmits(["imgLoaded"]);
 
 const handleFileDrop = (event) => {
-    const files = event.dataTransfer.files;
-    handleFiles(files);
+    handleFiles(event.dataTransfer.files);
 };
 
-const fileInputClick = () => {
-    fileInput.value.click();
-};
-
-const handleFiles = async (payload) => {
-    results.value = null;
-    if (!imageSrc) return;
+const handleFiles = (payload) => {
+    if (!imgSrc) return;
 
     let files = payload;
     if (payload instanceof Event) {
@@ -137,8 +79,8 @@ const handleFiles = async (payload) => {
             // 使用 FileReader 來讀取文件
             const reader = new FileReader();
 
-            reader.onload = async (e) => {
-                imageSrc.value = e.target.result; // 將讀取到的結果賦值給 imageSrc，以顯示圖片
+            reader.onload = (e) => {
+                imgSrc.value = e.target.result; // 將讀取到的結果賦值給 imgSrc，以顯示圖片
             };
             reader.readAsDataURL(file); // 讀取文件
         } else {
@@ -148,66 +90,11 @@ const handleFiles = async (payload) => {
     }
 };
 
-// const dominantColor = ref(null);
-// const extractColor = (imgRef) => {
-//     const colorThief = new ColorThief();
-//     const colors = colorThief.getColor(imgRef);
-//     dominantColor.value = `rgb(${colors.join(",")},0.5)`;
-// };
-
-const predictImage = async () => {
-    if (!imgRef.value || !COCOSSD.value) {
-        console.error("Model is not loaded or image is not ready");
-        return;
-    }
-    const COCOSSD_Predictions = await COCOSSD.value.detect(imgRef.value);
-    // extractColor(imgRef.value);
-
-    console.log("COCOSSD_Predictions", COCOSSD_Predictions);
-    results.value = {
-        COCOSSD_Predictions,
-    };
+const imgLoadedHandler = () => {
+    emit("imgLoaded", imgRef);
 };
 
-const objectNames = computed(() => {
-    if (results.value) {
-        const names = results.value.COCOSSD_Predictions.map(
-            (prediction) => prediction.class
-        );
-        return names;
-    }
-    return [];
-});
-
-const objectDimensions = computed(() => {
-    if (results.value) {
-        const Dimensions = results.value.COCOSSD_Predictions.map(
-            (prediction) => {
-                return {
-                    left: prediction.bbox[0],
-                    top: prediction.bbox[1],
-                    width: prediction.bbox[2],
-                    height: prediction.bbox[3],
-                    class: prediction.class,
-                    score: (prediction.score * 100).toFixed(1),
-                };
-            }
-        );
-        return Dimensions;
-    }
-    return [];
-});
+const fileInputClick = () => {
+    fileInput.value.click();
+};
 </script>
-
-<style>
-.fade-enter-active,
-.fade-leave-active {
-    transition: 0.5s;
-}
-
-.fade-enter-from,
-.fade-leave-to {
-    opacity: 0;
-    transform: translateX(-50px);
-}
-</style>
