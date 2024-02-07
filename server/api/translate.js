@@ -2,10 +2,12 @@ import * as GCT from "@google-cloud/translate";
 const { Translate } = GCT.v2;
 
 export default defineEventHandler(async (event) => {
+    const runtimeConfig = useRuntimeConfig();
+    const GC_API_KEY = runtimeConfig.GC_API_KEY;
     const { text, target } = await readBody(event);
     const translate = new Translate({
         projectId: "nuxt3-tensorflow",
-        key: "AIzaSyAUYJjTWC5tjAKVDx8ySByorqELeOp9Ksg",
+        key: GC_API_KEY,
     });
 
     try {
