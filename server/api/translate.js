@@ -13,9 +13,6 @@ export default defineEventHandler(async (event) => {
         translations = Array.isArray(translations)
             ? translations
             : [translations];
-        // return translations.map(
-        //     (translation, i) => `${text[i]} => (${target}) ${translation}`
-        // );
         return translations[0];
     } catch (error) {
         return { error: error.message };

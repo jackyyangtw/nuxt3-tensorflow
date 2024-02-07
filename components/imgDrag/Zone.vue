@@ -30,7 +30,7 @@
                     v-if="imgSrc"
                     ref="imgRef"
                     :src="imgSrc || ''"
-                    class="max-w-full mt-4"
+                    class="max-w-full mt-4 shadow-lg bg-white rounded-lg"
                     alt="圖片預覽"
                     @load="imgLoadedHandler"
                 />

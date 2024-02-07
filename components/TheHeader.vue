@@ -28,6 +28,12 @@
                     圖像識別
                 </nuxt-link>
                 <nuxt-link
+                    to="/image-classification"
+                    class="text-gray-900 hover:underline dark:text-gray-100"
+                >
+                    圖像分類
+                </nuxt-link>
+                <nuxt-link
                     to="/chat"
                     class="text-gray-900 hover:underline dark:text-gray-100"
                 >

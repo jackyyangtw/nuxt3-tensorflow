@@ -5,7 +5,7 @@
     >
     <LoadingModel v-if="loadingModel" />
     <div class="flex pt-10" v-else>
-        <DragZone @imgLoaded="predictImage">
+        <ImgDragZone @imgLoaded="predictImage">
             <template #prediction>
                 <Transition name="fade">
                     <div v-if="predictComplete">
@@ -33,7 +33,7 @@
                     </div>
                 </Transition>
             </template>
-        </DragZone>
+        </ImgDragZone>
         <Transition name="fade-right">
             <div
                 v-if="results"
