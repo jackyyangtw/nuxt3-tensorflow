@@ -11,7 +11,7 @@
                     <div v-if="predictComplete">
                         <div
                             v-for="dimension in objectDimensions"
-                            :key="dimension"
+                            :key="dimension.score"
                         >
                             <div
                                 class="absolute bg-green-700/[0.5]"
@@ -58,8 +58,9 @@
     </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { useModelsStore } from "@/stores/models";
+import { type CocoSSD } from "@/types/cocoSSD.d";
 
 const modelsStore = useModelsStore();
 const { loadCocoSsd, setupTf } = modelsStore;
@@ -72,10 +73,9 @@ onMounted(async () => {
     loadingModel.value = false;
 });
 
-const results = ref(null);
-
+const results = ref<CocoSSD[] | null>(null);
 const predictComplete = ref(false);
-const predictImage = async (imgRef) => {
+const predictImage = async (imgRef: Ref<HTMLImageElement>) => {
     results.value = null;
     predictComplete.value = false;
     if (!imgRef.value || !COCOSSD.value) {
@@ -84,16 +84,12 @@ const predictImage = async (imgRef) => {
     }
     const COCOSSD_Predictions = await COCOSSD.value.detect(imgRef.value);
     predictComplete.value = true;
-    results.value = {
-        COCOSSD_Predictions,
-    };
+    results.value = COCOSSD_Predictions;
 };
 
 const objectNames = computed(() => {
     if (results.value) {
-        const names = results.value.COCOSSD_Predictions.map(
-            (prediction) => prediction.class
-        );
+        const names = results.value.map((prediction) => prediction.class);
         return names;
     }
     return [];
@@ -101,18 +97,16 @@ const objectNames = computed(() => {
 
 const objectDimensions = computed(() => {
     if (results.value) {
-        const Dimensions = results.value.COCOSSD_Predictions.map(
-            (prediction) => {
-                return {
-                    left: prediction.bbox[0],
-                    top: prediction.bbox[1],
-                    width: prediction.bbox[2],
-                    height: prediction.bbox[3],
-                    class: prediction.class,
-                    score: (prediction.score * 100).toFixed(1),
-                };
-            }
-        );
+        const Dimensions = results.value.map((prediction) => {
+            return {
+                left: prediction.bbox[0],
+                top: prediction.bbox[1],
+                width: prediction.bbox[2],
+                height: prediction.bbox[3],
+                class: prediction.class,
+                score: (prediction.score * 100).toFixed(1),
+            };
+        });
         return Dimensions;
     }
     return [];

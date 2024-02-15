@@ -5,8 +5,9 @@
     <div v-if="results">{{ highScore }}</div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { useModelsStore } from "@/stores/models";
+import { type MobileNet } from "@/types/mobilenet.d";
 
 const modelsStore = useModelsStore();
 const { loadMobileNet, setupTf } = modelsStore;
@@ -19,8 +20,8 @@ onMounted(async () => {
     isLoadingModel.value = false;
 });
 
-const results = ref(null);
-const handleImgLoaded = async (imgRef) => {
+const results = ref<MobileNet[] | null>(null);
+const handleImgLoaded = async (imgRef: Ref<HTMLImageElement>) => {
     results.value = await MOBILENET.value.classify(imgRef.value);
 };
 const highScore = computed(() => {

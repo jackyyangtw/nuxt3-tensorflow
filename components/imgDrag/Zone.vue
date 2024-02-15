@@ -53,48 +53,46 @@
     </div>
 </template>
 
-<script setup>
-const fileInput = ref(null);
+<script setup lang="ts">
+const fileInput: Ref<HTMLInputElement | null> = ref(null);
+const imgRef: Ref<HTMLImageElement | null> = ref(null);
+const imgSrc: Ref<string | null> = ref(null);
 
-const imgRef = ref(null);
-const imgSrc = ref(null);
+const emit = defineEmits(['imgLoaded']);
 
-const emit = defineEmits(["imgLoaded"]);
-
-const handleFileDrop = (event) => {
-    handleFiles(event.dataTransfer.files);
+const handleFileDrop = (event: DragEvent) => {
+    if(event.dataTransfer) {
+        handleFiles(event.dataTransfer.files);
+    }
 };
 
-const handleFiles = (payload) => {
-    if (!imgSrc) return;
-
-    let files = payload;
-    if (payload instanceof Event) {
-        files = payload.target.files;
+const handleFiles = (payload: FileList | Event) => {
+    let files: FileList;
+    if (payload instanceof Event && payload.target) {
+        files = (payload.target as HTMLInputElement).files as FileList;
+    } else {
+        files = payload as FileList;
     }
 
-    if (files.length > 0) {
+    if (files && files.length > 0) {
         const file = files[0];
         if (file.type.startsWith("image/")) {
-            // 使用 FileReader 來讀取文件
             const reader = new FileReader();
-
-            reader.onload = (e) => {
-                imgSrc.value = e.target.result; // 將讀取到的結果賦值給 imgSrc，以顯示圖片
+            reader.onload = (e: ProgressEvent<FileReader>) => {
+                imgSrc.value = e.target?.result as string;
             };
-            reader.readAsDataURL(file); // 讀取文件
+            reader.readAsDataURL(file);
         } else {
-            // 如果上傳的不是圖片文件，可以在這裡處理錯誤或顯示提醒
             alert("請上傳圖片文件！");
         }
     }
 };
 
 const imgLoadedHandler = () => {
-    emit("imgLoaded", imgRef);
+    emit('imgLoaded', imgRef);
 };
 
 const fileInputClick = () => {
-    fileInput.value.click();
+    fileInput.value?.click();
 };
 </script>

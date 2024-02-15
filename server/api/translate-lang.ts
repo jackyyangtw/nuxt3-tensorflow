@@ -12,7 +12,7 @@ export default defineEventHandler(async (event) => {
     try {
         let [languages] = await translate.getLanguages();
         return languages;
-    } catch (error) {
+    } catch (error: any) {
         return { error: error.message };
     }
 });

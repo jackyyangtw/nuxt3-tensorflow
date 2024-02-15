@@ -5,11 +5,11 @@ import * as qna from "@tensorflow-models/qna";
 import * as deeplab from "@tensorflow-models/deeplab";
 
 // tsfjs models
-let MOBILENET = null;
-let COCOSSD = null;
-let QNA = null;
-let DEEPLAB = null;
-let TF = tf;
+let MOBILENET: any = null;
+let COCOSSD: any = null;
+let QNA: any = null;
+let DEEPLAB: any = null;
+let TF: any = tf;
 
 export const useModelsStore = defineStore("models", {
     state: () => ({

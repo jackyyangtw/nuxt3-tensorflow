@@ -11,12 +11,12 @@ export default defineEventHandler(async (event) => {
     });
 
     try {
-        let [translations] = await translate.translate(text, target);
+        let [translations]: any = await translate.translate(text, target);
         translations = Array.isArray(translations)
             ? translations
             : [translations];
         return translations[0];
-    } catch (error) {
+    } catch (error: any) {
         return { error: error.message };
     }
 });

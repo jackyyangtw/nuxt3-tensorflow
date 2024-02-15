@@ -48,7 +48,7 @@
                             :selected="selectedLang === supportLang.code"
                             :value="supportLang.code"
                             v-for="supportLang in supportLangs"
-                            :key="supportLang"
+                            :key="supportLang.code"
                             >{{ supportLang.name }}</option
                         >
                     </select>
@@ -67,23 +67,21 @@
     <div v-if="answers">{{ answers }}</div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { useModelsStore } from "@/stores/models";
-// import { QNA } from "@/stores/models";
+import { type GCTSupportLang } from "@/types/GCT.d";
+
 const modelsStore = useModelsStore();
 const { loadQNA, setupTf } = modelsStore;
 const { QNA } = storeToRefs(modelsStore);
-// const { isQNALoaded } = storeToRefs(modelsStore);
 
 const passage = ref(
     `US Senator Tom Cotton repeatedly asked Shou Zi Chew, the CEO of Chinese-owned social media app TikTok, about his links to the Chinese Communist Party, despite Mr Chew repeatedly asserting that he is Singaporean at a hearing in Washington DC on Wednesday.In this minute-long exchange, Mr Cotton asks Mr Chew about his citizenship, passport and whether he is a member of the CCP, to which he replies "Senator, I'm Singaporean. No."TikTok is owned by Chinese company ByteDance.Mr Chew denies his company has ever shared or received a request to share US users data with the Chinese government.`
 );
 const question = ref("");
-const answers = ref(null);
+const answers = ref<null | string>(null);
 
-const fetchedResults = ref(null);
-
-const translateText = async (enteredText, targetLang = "en") => {
+const translateText = async (enteredText: string, targetLang = "en") => {
     const response = await $fetch("/api/translate", {
         method: "POST",
         body: { text: enteredText, target: targetLang },
@@ -91,6 +89,7 @@ const translateText = async (enteredText, targetLang = "en") => {
     return response;
 };
 
+const fetchedResults = ref<Promise<any> | null | string>(null);
 const handleQuestion = async () => {
     answers.value = null;
     // if (!isQNALoaded.value) return;
@@ -104,30 +103,31 @@ const handleQuestion = async () => {
         return;
     }
     fetchedResults.value = result;
-    const highScoreAnswer = result.reduce((prev, current) =>
+    const highScoreAnswer = result.reduce((prev: any, current: any) =>
         prev.score > current.score ? prev : current
     ).text;
     const translatedAnswer = await translateText(
         highScoreAnswer,
         selectedLang.value
     );
-    answers.value = translatedAnswer;
+    answers.value = translatedAnswer as string;
 };
 
-const supportLangs = ref([]);
-const selectedLang = ref("");
+const supportLangs = ref<GCTSupportLang[]>([]);
+const selectedLang = ref<string>("");
 const isLoading = ref(true);
 onMounted(async () => {
-    const langs = await $fetch("/api/translate-lang");
+    const langs: GCTSupportLang[] = await $fetch("/api/translate-lang");
 
     const defaultLang = langs.find((lang) => lang.code === navigator.language);
-    selectedLang.value = defaultLang.code;
+    if (defaultLang) {
+        selectedLang.value = defaultLang.code;
+    }
 
     supportLangs.value = langs;
 
     await setupTf();
     await loadQNA();
     isLoading.value = false;
-    // {code: 'gd', name: 'Scots Gaelic'}
 });
 </script>
