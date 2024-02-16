@@ -22,26 +22,29 @@
             </nuxt-link>
             <nav class="flex space-x-8">
                 <nuxt-link
-                    to="/image-recognition"
-                    class="text-gray-900 hover:underline dark:text-gray-100"
+                    v-for="link in links"
+                    :key="link.url"
+                    :to="link.url"
+                    class="text-gray-900 dark:text-gray-100"
                 >
-                    圖像識別
-                </nuxt-link>
-                <nuxt-link
-                    to="/image-classification"
-                    class="text-gray-900 hover:underline dark:text-gray-100"
-                >
-                    圖像分類
-                </nuxt-link>
-                <nuxt-link
-                    to="/chat"
-                    class="text-gray-900 hover:underline dark:text-gray-100"
-                >
-                    聊天
+                    {{ link.title }}
                 </nuxt-link>
             </nav>
         </div>
     </header>
 </template>
 
-<script setup></script>
+<script setup>
+const links = [
+    { title: "圖像識別", url: "/image-recognition" },
+    { title: "圖像分類", url: "/image-classification" },
+    { title: "聊天", url: "/chat" },
+    { title: "圖像編輯", url: "/image-edit" },
+];
+</script>
+
+<style scoped>
+.router-link-active {
+    @apply dark:text-amber-500 font-extrabold;
+}
+</style>

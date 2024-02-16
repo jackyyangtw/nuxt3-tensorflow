@@ -60,7 +60,7 @@
 
 <script setup lang="ts">
 import { useModelsStore } from "@/stores/models";
-import { type CocoSSD } from "@/types/cocoSSD.d";
+import { type CocoSSD } from "@/types/cocossd.d";
 
 const modelsStore = useModelsStore();
 const { loadCocoSsd, setupTf } = modelsStore;
@@ -135,3 +135,4 @@ const objectDimensions = computed(() => {
     opacity: 0;
 }
 </style>
+~/types/cocossd

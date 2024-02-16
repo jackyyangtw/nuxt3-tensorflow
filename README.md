@@ -16,6 +16,10 @@
 -   https://github.com/tensorflow/tfjs-models/tree/master/coco-ssd
 -   DEMO: https://tensorflow-js-object-detection.glitch.me/
 
+## tensorflowjs image api
+
+-   https://js.tensorflow.org/api/latest/?hl=zh-cn#Operations-Images
+
 ## 模型比較
 
 | 模型      | 差異                                                                                                                            | 應用情境                                           | 專案構想                                                                                                                                           |

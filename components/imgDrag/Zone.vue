@@ -58,10 +58,10 @@ const fileInput: Ref<HTMLInputElement | null> = ref(null);
 const imgRef: Ref<HTMLImageElement | null> = ref(null);
 const imgSrc: Ref<string | null> = ref(null);
 
-const emit = defineEmits(['imgLoaded']);
+const emit = defineEmits(["imgLoaded"]);
 
 const handleFileDrop = (event: DragEvent) => {
-    if(event.dataTransfer) {
+    if (event.dataTransfer) {
         handleFiles(event.dataTransfer.files);
     }
 };
@@ -89,7 +89,7 @@ const handleFiles = (payload: FileList | Event) => {
 };
 
 const imgLoadedHandler = () => {
-    emit('imgLoaded', imgRef);
+    emit("imgLoaded", imgRef);
 };
 
 const fileInputClick = () => {

@@ -75,19 +75,19 @@ const modelsStore = useModelsStore();
 const { loadQNA, setupTf } = modelsStore;
 const { QNA } = storeToRefs(modelsStore);
 
-const passage = ref(
-    `US Senator Tom Cotton repeatedly asked Shou Zi Chew, the CEO of Chinese-owned social media app TikTok, about his links to the Chinese Communist Party, despite Mr Chew repeatedly asserting that he is Singaporean at a hearing in Washington DC on Wednesday.In this minute-long exchange, Mr Cotton asks Mr Chew about his citizenship, passport and whether he is a member of the CCP, to which he replies "Senator, I'm Singaporean. No."TikTok is owned by Chinese company ByteDance.Mr Chew denies his company has ever shared or received a request to share US users data with the Chinese government.`
-);
-const question = ref("");
-const answers = ref<null | string>(null);
-
-const translateText = async (enteredText: string, targetLang = "en") => {
+async function translateText(enteredText: string, targetLang = "en") {
     const response = await $fetch("/api/translate", {
         method: "POST",
         body: { text: enteredText, target: targetLang },
     });
     return response;
-};
+}
+
+const passage = ref(
+    `US Senator Tom Cotton repeatedly asked Shou Zi Chew, the CEO of Chinese-owned social media app TikTok, about his links to the Chinese Communist Party, despite Mr Chew repeatedly asserting that he is Singaporean at a hearing in Washington DC on Wednesday.In this minute-long exchange, Mr Cotton asks Mr Chew about his citizenship, passport and whether he is a member of the CCP, to which he replies "Senator, I'm Singaporean. No."TikTok is owned by Chinese company ByteDance.Mr Chew denies his company has ever shared or received a request to share US users data with the Chinese government.`
+);
+const question = ref("");
+const answers = ref<null | string>(null);
 
 const fetchedResults = ref<Promise<any> | null | string>(null);
 const handleQuestion = async () => {
